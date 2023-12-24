@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Upgrayedd0408/tinyapp/issues"
   },
-  "homepage": "https://github.com/Upgrayedd0408/tinyapp#readme"
+  "homepage": "https://github.com/Upgrayedd0408/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
