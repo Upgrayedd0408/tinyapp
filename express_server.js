@@ -9,6 +9,8 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+app.use(express.urlencoded({ extende: true }));
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -19,6 +21,10 @@ app.get("/urls", (req, res) => {
 
   };
   res.render("urls_index", templateVars);
+});
+
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -34,6 +40,16 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body</html>\n");
 });
 
+app.post("/urls", (req, res) => {
+  console.log(req.body); // Log the POST request body to the console
+  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
+
+
+function generateRandomString() {
+
+};
