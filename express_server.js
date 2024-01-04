@@ -11,6 +11,7 @@ const urlDatabase = {
 
 app.use(express.urlencoded({ extended: true }));
 
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -52,6 +53,11 @@ app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   urlDatabase[id] = longURL;
   res.redirect(`/urls/${id}`);
+});
+
+app.post("/login", (req, res) => {
+  res.cookie('username', req.body.username);
+  res.redirect("/urls");
 });
 
 app.post("/urls/:id/delete", (req, res) => {
