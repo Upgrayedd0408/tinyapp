@@ -5,13 +5,26 @@ const cookieParser = require('cookie-parser');
 
 app.set("view engine", "ejs");
 
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+const users = {
+  userRandomID: {
+    id: 'userRandomID',
+    email: 'user@example.com',
+    password: 'purple-monkey-dinosaur'
+  },
+  user2RandomID: {
+    id: 'user2RandomID',
+    email: 'user2@example.com',
+    password: 'dishwasher-funk'
+  }
+};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -75,7 +88,54 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
-})
+});
+
+app.post("/register", (req, res) => {
+  //assign user inputs to variables
+  const email = req.body.email;
+  const password = req.body.password;
+  
+  // Display error message if user leaves fields blank
+  if (!email || !password) {
+    return res.status(400).send("Please provide a email and a password");
+  };
+
+  // check our user database to see if the email address already exists.
+  const findUserByEmail = (email, users) => {
+    for (const userId in users) {
+      const user = users[userId];
+      if (user.email === email) {
+        return user;
+      }
+    }
+  
+    return null;
+  }
+
+
+
+  // Display error message if email is already in use
+  if (findUserByEmail()) {
+    return res.status(400).send("A User with that email address already exists");
+  }
+
+  const id = generateRandomString();
+
+  // set up a new user using the random ID and user inputs
+  const newUser = {
+    id,
+    email,
+    password
+  };
+
+  // add new user to user database
+  users[id] = newUser;
+
+  console.log(users);
+
+  res.redirect("/urls");
+
+});
 
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
