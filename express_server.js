@@ -31,25 +31,34 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  const userId = req.cookies['user_id'];
+  const user = users[userId];
+
   const templateVars = { 
+    user,
     urls: urlDatabase,
-    username: req.cookies["username"]
   };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
+  const userId = req.cookies['user_id'];
+  const user = users[userId];
+
   const templateVars = {
-    username: req.cookies["username"]
+    user,
   };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
+  const userId = req.cookies['user_id'];
+  const user = users[userId];
+
   const templateVars = { 
+    user,
     id: req.params.id, 
     longURL: urlDatabase[req.params.id],
-    username: req.cookies["username"]
    };
   res.render("urls_show", templateVars);
 });
@@ -81,12 +90,33 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect("/urls");
+  const email = req.body.email;
+  const password = req.body.password;
+
+  const findUserByEmail = (email, users) => {
+    for (const userId in users) {
+      const user = users[userId];
+      if (user.email === email) {
+        return user;
+      }
+    }
+  
+    return null;
+  };
+
+  const user = findUserByEmail(email, users);
+
+  if (user) {
+    res.cookie('user_id', user.id);
+    res.redirect("/urls");
+  } else {
+    res.status(403).send("Email or password is incorrect");
+  }
+
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
@@ -112,10 +142,11 @@ app.post("/register", (req, res) => {
     return null;
   }
 
+  const user = findUserByEmail(email, users);
 
 
   // Display error message if email is already in use
-  if (findUserByEmail()) {
+  if (user) {
     return res.status(400).send("A User with that email address already exists");
   }
 
@@ -132,6 +163,8 @@ app.post("/register", (req, res) => {
   users[id] = newUser;
 
   console.log(users);
+
+  res.cookie('user_id', id);
 
   res.redirect("/urls");
 
