@@ -26,8 +26,29 @@ const users = {
   }
 };
 
+  // check our user database to see if the email address already exists.
+  const findUserByEmail = (email, users) => {
+    for (const userId in users) {
+      const user = users[userId];
+      if (user.email === email) {
+        return user;
+      }
+    }
+  
+    return null;
+  }
+
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  const userId = req.cookies['user_id'];
+  const user = users[userId];
+
+  if (user) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
+  };
+  
+  //res.send("Hello!");
 });
 
 app.get("/urls", (req, res) => {
@@ -38,6 +59,11 @@ app.get("/urls", (req, res) => {
     user,
     urls: urlDatabase,
   };
+
+  if (!user) {
+    res.status(403).send("Please login to gain access");
+  };
+
   res.render("urls_index", templateVars);
 });
 
@@ -48,6 +74,11 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     user,
   };
+
+  if (!user) {
+    res.redirect("/login");
+  };
+
   res.render("urls_new", templateVars);
 });
 
@@ -111,16 +142,16 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  const findUserByEmail = (email, users) => {
-    for (const userId in users) {
-      const user = users[userId];
-      if (user.email === email) {
-        return user;
-      }
-    }
+  // const findUserByEmail = (email, users) => {
+  //   for (const userId in users) {
+  //     const user = users[userId];
+  //     if (user.email === email) {
+  //       return user;
+  //     }
+  //   }
   
-    return null;
-  };
+  //   return null;
+  // };
 
   const user = findUserByEmail(email, users);
 
@@ -149,16 +180,16 @@ app.post("/register", (req, res) => {
   };
 
   // check our user database to see if the email address already exists.
-  const findUserByEmail = (email, users) => {
-    for (const userId in users) {
-      const user = users[userId];
-      if (user.email === email) {
-        return user;
-      }
-    }
+  // const findUserByEmail = (email, users) => {
+  //   for (const userId in users) {
+  //     const user = users[userId];
+  //     if (user.email === email) {
+  //       return user;
+  //     }
+  //   }
   
-    return null;
-  }
+  //   return null;
+  // }
 
   const user = findUserByEmail(email, users);
 
