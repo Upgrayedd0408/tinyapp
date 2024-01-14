@@ -61,7 +61,7 @@ app.get("/urls", (req, res) => {
   };
 
   if (!user) {
-    res.status(403).send("Please login to gain access");
+    res.status(403).send("Please login to gain access to our awesome features!");
   };
 
   res.render("urls_index", templateVars);
@@ -95,8 +95,12 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
+  if (urlDatabase.hasOwnProperty(req.params.id)) {
+    const longURL = urlDatabase[req.params.id];
+    res.redirect(longURL);
+  } else {
+    res.status(404).send("Id does not exist");
+  };
 });
 
 app.get("/urls.json", (req, res) => {
@@ -115,6 +119,10 @@ app.get("/register", (req, res) => {
     user
   };
 
+  if (user) {
+    res.redirect("/urls");
+  };
+
   res.render("register", templateVars);
 });
 
@@ -126,14 +134,23 @@ app.get("/login", (req, res) => {
     user
   };
 
+  if (user) {
+    res.redirect("/urls");
+  };
+
   res.render("login", templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  // console.log(req.body); // Log the POST request body to the console
-  // res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  const userId = req.cookies['user_id'];
+  const user = users[userId];
+
   const id = generateRandomString();
   const longURL = req.body.longURL;
+
+  if (!user) {
+    res.status(403).send("Please login to gain access to our awesome features!");
+  };
   urlDatabase[id] = longURL;
   res.redirect(`/urls/${id}`);
 });
