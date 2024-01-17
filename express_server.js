@@ -9,9 +9,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "aJ48lW",
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "aJ48lW",
+  },
 };
+
 
 const users = {
   userRandomID: {
@@ -23,6 +30,11 @@ const users = {
     id: 'user2RandomID',
     email: 'user2@example.com',
     password: 'dishwasher-funk'
+  },
+  aJ48lW: {
+    id: 'aJ48lW',
+    email: 'user3@example.com',
+    password: '123'
   }
 };
 
@@ -55,9 +67,21 @@ app.get("/urls", (req, res) => {
   const userId = req.cookies['user_id'];
   const user = users[userId];
 
+  const urlsForUser = (userId) => {
+    let userUrls = {};
+    for (const url in urlDatabase) {
+      if (urlDatabase[url].userID === userId) {
+        userUrls[url] = urlDatabase[url];
+      };
+    };
+    return userUrls;
+  };
+
+  console.log(urlsForUser(userId));
+
   const templateVars = { 
     user,
-    urls: urlDatabase,
+    urls: urlsForUser(userId),
   };
 
   if (!user) {
@@ -86,20 +110,37 @@ app.get("/urls/:id", (req, res) => {
   const userId = req.cookies['user_id'];
   const user = users[userId];
 
+  if (!user) {
+    res.status(403).send("Please login to gain access to our awesome features!");
+    return
+  };
+
+  if (urlDatabase.hasOwnProperty(req.params.id)) {
+    if (urlDatabase[req.params.id].userID !== userId) {
+      res.status(403).send("You do not have access to edit this link");
+      return
+    };
+  } else {
+    res.status(404).send("Id does not exist");
+    return
+  };
+
+
   const templateVars = { 
     user,
     id: req.params.id, 
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase[req.params.id].longURL,
    };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
   if (urlDatabase.hasOwnProperty(req.params.id)) {
-    const longURL = urlDatabase[req.params.id];
+    const longURL = urlDatabase[req.params.id].longURL;
     res.redirect(longURL);
   } else {
     res.status(404).send("Id does not exist");
+    return
   };
 });
 
@@ -146,12 +187,22 @@ app.post("/urls", (req, res) => {
   const user = users[userId];
 
   const id = generateRandomString();
-  const longURL = req.body.longURL;
+  let longURL = req.body.longURL;
 
   if (!user) {
     res.status(403).send("Please login to gain access to our awesome features!");
+    return;
   };
-  urlDatabase[id] = longURL;
+
+  if (!longURL.startsWith('http://') && !longURL.startsWith('https://')) {
+    longURL = 'http://' + longURL;
+  };
+
+  urlDatabase[id] = {
+    longURL,
+    userID: userId
+  };
+  console.log(urlDatabase);
   res.redirect(`/urls/${id}`);
 });
 
@@ -237,15 +288,51 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
+  const userId = req.cookies['user_id'];
+  const user = users[userId];
+
+  if (!user) {
+    res.status(403).send("Please login to gain access to our awesome features!");
+    return
+  };
+
+  if (urlDatabase.hasOwnProperty(req.params.id)) {
+    if (urlDatabase[req.params.id].userID !== userId) {
+      res.status(403).send("You do not have access to edit this link");
+      return
+    };
+  } else {
+    res.status(404).send("Id does not exist");
+    return
+  };
+
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
 
 app.post("/urls/:id", (req, res) => {
+  const userId = req.cookies['user_id'];
+  const user = users[userId];
   const shortUrlId = req.params.id;
   const newLongUrl = req.body.longURL;
+
+  if (!user) {
+    res.status(403).send("Please login to gain access to our awesome features!");
+    return
+  };
+
+  if (urlDatabase.hasOwnProperty(req.params.id)) {
+    if (urlDatabase[req.params.id].userID !== userId) {
+      res.status(403).send("You do not have access to edit this link");
+      return
+    };
+  } else {
+    res.status(404).send("Id does not exist");
+    return
+  };
+
   if (urlDatabase[shortUrlId]) {
-    urlDatabase[shortUrlId] = newLongUrl;
+    urlDatabase[shortUrlId].longURL = newLongUrl;
   };
   res.redirect("/urls");
 });
