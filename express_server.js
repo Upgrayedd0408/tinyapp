@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const PORT = 8080; // default port 8080;
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
 
 app.set("view engine", "ejs");
 
@@ -210,25 +211,22 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  // const findUserByEmail = (email, users) => {
-  //   for (const userId in users) {
-  //     const user = users[userId];
-  //     if (user.email === email) {
-  //       return user;
-  //     }
-  //   }
-  
-  //   return null;
-  // };
-
   const user = findUserByEmail(email, users);
 
-  if (user && user.password === password) {
+  if (user && bcrypt.compareSync(password, user.hashedPassword)) {
     res.cookie('user_id', user.id);
     res.redirect("/urls");
   } else {
     res.status(403).send("Email or password is incorrect");
-  }
+  };
+
+
+  // if (user && user.password === password) {
+  //   res.cookie('user_id', user.id);
+  //   res.redirect("/urls");
+  // } else {
+  //   res.status(403).send("Email or password is incorrect");
+  // };
 
 });
 
@@ -241,6 +239,7 @@ app.post("/register", (req, res) => {
   //assign user inputs to variables
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   
   // Display error message if user leaves fields blank
   if (!email || !password) {
@@ -273,7 +272,7 @@ app.post("/register", (req, res) => {
   const newUser = {
     id,
     email,
-    password
+    hashedPassword
   };
 
   // add new user to user database
