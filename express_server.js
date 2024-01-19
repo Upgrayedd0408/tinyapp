@@ -23,24 +23,28 @@ const urlDatabase = {
   },
 };
 
+const salt = bcryptjs.genSaltSync(10);
+
 
 const users = {
   userRandomID: {
     id: 'userRandomID',
     email: 'user@example.com',
-    password: 'purple-monkey-dinosaur'
+    password: bcrypt.hashSync('purple-monkey-dinosaur', salt)
   },
   user2RandomID: {
     id: 'user2RandomID',
     email: 'user2@example.com',
-    password: 'dishwasher-funk'
+    password: bcrypt.hashSync('dishwasher-funk', salt)
   },
   aJ48lW: {
     id: 'aJ48lW',
     email: 'user3@example.com',
-    password: '123'
+    password: bcrypt.hashSync('123', salt)
   }
 };
+
+/// Helper Functions
 
   // check our user database to see if the email address already exists.
   const findUserByEmail = (email, users) => {
@@ -53,6 +57,16 @@ const users = {
   
     return null;
   }
+
+  const urlsForUser = (userId) => {
+    let userUrls = {};
+    for (const url in urlDatabase) {
+      if (urlDatabase[url].userID === userId) {
+        userUrls[url] = urlDatabase[url];
+      };
+    };
+    return userUrls;
+  };
 
   function generateRandomString() {
     return Math.random().toString(36).substring(2, 8);
@@ -68,22 +82,21 @@ app.get("/", (req, res) => {
     res.redirect("/login");
   };
   
-  //res.send("Hello!");
 });
 
 app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
 
-  const urlsForUser = (userId) => {
-    let userUrls = {};
-    for (const url in urlDatabase) {
-      if (urlDatabase[url].userID === userId) {
-        userUrls[url] = urlDatabase[url];
-      };
-    };
-    return userUrls;
-  };
+  // const urlsForUser = (userId) => {
+  //   let userUrls = {};
+  //   for (const url in urlDatabase) {
+  //     if (urlDatabase[url].userID === userId) {
+  //       userUrls[url] = urlDatabase[url];
+  //     };
+  //   };
+  //   return userUrls;
+  // };
 
   console.log(urlsForUser(userId));
 
@@ -156,9 +169,9 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body</html>\n");
-});
+// app.get("/hello", (req, res) => {
+//   res.send("<html><body>Hello <b>World</b></body</html>\n");
+// });
 
 app.get("/register", (req, res) => {
   const userId = req.session.user_id;
@@ -327,8 +340,3 @@ app.post("/urls/:id", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
-
-
-// function generateRandomString() {
-//   return Math.random().toString(36).substring(2, 8);
-// };
