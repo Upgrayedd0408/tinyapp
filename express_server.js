@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080;
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
-const {findUserByEmail, urlsForUser} = require('./helpers');
+const { getUserByEmail, urlsForUser, generateRandomString } = require('./helpers');
 
 
 app.set("view engine", "ejs");
@@ -46,33 +46,6 @@ const users = {
   }
 };
 
-/// Helper Functions
-
-  // // check our user database to see if the email address already exists.
-  // const findUserByEmail = (email, users) => {
-  //   for (const userId in users) {
-  //     const user = users[userId];
-  //     if (user.email === email) {
-  //       return user;
-  //     }
-  //   }
-  
-  //   return null;
-  // }
-
-  // const urlsForUser = (userId) => {
-  //   let userUrls = {};
-  //   for (const url in urlDatabase) {
-  //     if (urlDatabase[url].userID === userId) {
-  //       userUrls[url] = urlDatabase[url];
-  //     };
-  //   };
-  //   return userUrls;
-  // };
-
-  function generateRandomString() {
-    return Math.random().toString(36).substring(2, 8);
-  };
 
 app.get("/", (req, res) => {
   const userId = req.session.user_id;
@@ -90,21 +63,11 @@ app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
 
-  // const urlsForUser = (userId) => {
-  //   let userUrls = {};
-  //   for (const url in urlDatabase) {
-  //     if (urlDatabase[url].userID === userId) {
-  //       userUrls[url] = urlDatabase[url];
-  //     };
-  //   };
-  //   return userUrls;
-  // };
-
-  console.log(urlsForUser(userId));
+  //console.log(urlsForUser(userId));
 
   const templateVars = { 
     user,
-    urls: urlsForUser(userId),
+    urls: urlsForUser(userId, urlDatabase),
   };
 
   if (!user) {
@@ -233,7 +196,7 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  const user = findUserByEmail(email, users);
+  const user = getUserByEmail(email, users);
 
   if (user && bcrypt.compareSync(password, user.hashedPassword)) {
     req.session.user_id = user.id;
@@ -260,7 +223,8 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Please provide a email and a password");
   };
 
-  const user = findUserByEmail(email, users);
+  console.log(getUserByEmail);
+  const user = getUserByEmail(email, users);
 
 
   // Display error message if email is already in use

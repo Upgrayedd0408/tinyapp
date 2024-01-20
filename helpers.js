@@ -1,5 +1,5 @@
   // check our user database to see if the email address already exists.
-  const findUserByEmail = (email, users) => {
+  const getUserByEmail = (email, users) => {
     for (const userId in users) {
       const user = users[userId];
       if (user.email === email) {
@@ -10,15 +10,19 @@
     return null;
   };
 
-  // const urlsForUser = (userId) => {
-  //   let userUrls = {};
-  //   for (const url in urlDatabase) {
-  //     if (urlDatabase[url].userID === userId) {
-  //       userUrls[url] = urlDatabase[url];
-  //     };
-  //   };
-  //   return userUrls;
-  // };
+  const urlsForUser = (userId, urlDatabase) => {
+    let userUrls = {};
+    for (const url in urlDatabase) {
+      if (urlDatabase[url].userID === userId) {
+        userUrls[url] = urlDatabase[url];
+      };
+    };
+    return userUrls;
+  };
+
+  function generateRandomString() {
+    return Math.random().toString(36).substring(2, 8);
+  };
 
 
 
@@ -26,5 +30,4 @@
 
 
 
-  module.exports = { findUserByEmail };
- // module.exports = urlsForUser;
+  module.exports = { getUserByEmail, urlsForUser, generateRandomString };
