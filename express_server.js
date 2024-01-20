@@ -3,6 +3,8 @@ const app = express();
 const PORT = 8080; // default port 8080;
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
+const {findUserByEmail, urlsForUser} = require('./helpers');
+
 
 app.set("view engine", "ejs");
 
@@ -23,7 +25,7 @@ const urlDatabase = {
   },
 };
 
-const salt = bcryptjs.genSaltSync(10);
+const salt = bcrypt.genSaltSync(10);
 
 
 const users = {
@@ -46,27 +48,27 @@ const users = {
 
 /// Helper Functions
 
-  // check our user database to see if the email address already exists.
-  const findUserByEmail = (email, users) => {
-    for (const userId in users) {
-      const user = users[userId];
-      if (user.email === email) {
-        return user;
-      }
-    }
+  // // check our user database to see if the email address already exists.
+  // const findUserByEmail = (email, users) => {
+  //   for (const userId in users) {
+  //     const user = users[userId];
+  //     if (user.email === email) {
+  //       return user;
+  //     }
+  //   }
   
-    return null;
-  }
+  //   return null;
+  // }
 
-  const urlsForUser = (userId) => {
-    let userUrls = {};
-    for (const url in urlDatabase) {
-      if (urlDatabase[url].userID === userId) {
-        userUrls[url] = urlDatabase[url];
-      };
-    };
-    return userUrls;
-  };
+  // const urlsForUser = (userId) => {
+  //   let userUrls = {};
+  //   for (const url in urlDatabase) {
+  //     if (urlDatabase[url].userID === userId) {
+  //       userUrls[url] = urlDatabase[url];
+  //     };
+  //   };
+  //   return userUrls;
+  // };
 
   function generateRandomString() {
     return Math.random().toString(36).substring(2, 8);
