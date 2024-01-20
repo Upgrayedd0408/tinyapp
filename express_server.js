@@ -25,6 +25,7 @@ const urlDatabase = {
   },
 };
 
+// set's how many salt rounds being used during hashing.
 const salt = bcrypt.genSaltSync(10);
 
 
@@ -51,6 +52,7 @@ app.get("/", (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
 
+  // checks if user is logged in
   if (user) {
     res.redirect("/urls");
   } else {
@@ -63,13 +65,13 @@ app.get("/urls", (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
 
-  //console.log(urlsForUser(userId));
 
   const templateVars = { 
     user,
     urls: urlsForUser(userId, urlDatabase),
   };
 
+  // Checks to see if the user is not logged in
   if (!user) {
     res.status(403).send("Please login to gain access to our awesome features!");
   };
@@ -101,6 +103,7 @@ app.get("/urls/:id", (req, res) => {
     return
   };
 
+  // Check to see if the urlDatabase contains the id passed into the domain
   if (urlDatabase.hasOwnProperty(req.params.id)) {
     if (urlDatabase[req.params.id].userID !== userId) {
       res.status(403).send("You do not have access to edit this link");
@@ -121,6 +124,7 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
+  // Check to see if the urlDatabase contains the id passed into the domain
   if (urlDatabase.hasOwnProperty(req.params.id)) {
     const longURL = urlDatabase[req.params.id].longURL;
     res.redirect(longURL);
@@ -172,6 +176,7 @@ app.post("/urls", (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
 
+  // Creates a random string to be used as the urlDatabase Id
   const id = generateRandomString();
   let longURL = req.body.longURL;
 
@@ -196,8 +201,10 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
+  // Looks up the user object based on the email address.
   const user = getUserByEmail(email, users);
 
+  // Checks to see if the user exists and if the hashed passwords match
   if (user && bcrypt.compareSync(password, user.hashedPassword)) {
     req.session.user_id = user.id;
     res.redirect("/urls");
@@ -208,6 +215,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
+  // sets cookies to null
   req.session.user_id = null;
   res.redirect('/login');
 });
