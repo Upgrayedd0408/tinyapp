@@ -138,9 +138,6 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body</html>\n");
-// });
 
 app.get("/register", (req, res) => {
   const userId = req.session.user_id;
@@ -254,7 +251,6 @@ app.post("/register", (req, res) => {
 
   console.log(users);
 
-  //res.session('user_id', id);
   req.session.user_id = id;
 
   res.redirect("/urls");
