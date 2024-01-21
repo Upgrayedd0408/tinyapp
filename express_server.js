@@ -4,6 +4,7 @@ const PORT = 8080; // default port 8080;
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 const { getUserByEmail, urlsForUser, generateRandomString } = require('./helpers');
+const { users, urlDatabase } = require('./in-memory-db');
 
 
 app.set("view engine", "ejs");
@@ -14,38 +15,38 @@ app.use(cookieSession({
   keys: ['randomkey1', 'randomkey2']
 }));
 
-const urlDatabase = {
-  "b2xVn2": {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: "aJ48lW",
-  },
-  "9sm5xK": {
-    longURL: "http://www.google.com",
-    userID: "aJ48lW",
-  },
-};
+// const urlDatabase = {
+//   "b2xVn2": {
+//     longURL: "http://www.lighthouselabs.ca",
+//     userID: "aJ48lW",
+//   },
+//   "9sm5xK": {
+//     longURL: "http://www.google.com",
+//     userID: "aJ48lW",
+//   },
+// };
 
 // set's how many salt rounds being used during hashing.
 const salt = bcrypt.genSaltSync(10);
 
 
-const users = {
-  userRandomID: {
-    id: 'userRandomID',
-    email: 'user@example.com',
-    password: bcrypt.hashSync('purple-monkey-dinosaur', salt)
-  },
-  user2RandomID: {
-    id: 'user2RandomID',
-    email: 'user2@example.com',
-    password: bcrypt.hashSync('dishwasher-funk', salt)
-  },
-  aJ48lW: {
-    id: 'aJ48lW',
-    email: 'user3@example.com',
-    password: bcrypt.hashSync('123', salt)
-  }
-};
+// const users = {
+//   userRandomID: {
+//     id: 'userRandomID',
+//     email: 'user@example.com',
+//     password: bcrypt.hashSync('purple-monkey-dinosaur', salt)
+//   },
+//   user2RandomID: {
+//     id: 'user2RandomID',
+//     email: 'user2@example.com',
+//     password: bcrypt.hashSync('dishwasher-funk', salt)
+//   },
+//   aJ48lW: {
+//     id: 'aJ48lW',
+//     email: 'user3@example.com',
+//     password: bcrypt.hashSync('123', salt)
+//   }
+// };
 
 
 app.get("/", (req, res) => {
@@ -74,6 +75,7 @@ app.get("/urls", (req, res) => {
   // Checks to see if the user is not logged in
   if (!user) {
     res.status(403).send("Please login to gain access to our awesome features!");
+    return;
   };
 
   res.render("urls_index", templateVars);
@@ -89,6 +91,7 @@ app.get("/urls/new", (req, res) => {
 
   if (!user) {
     res.redirect("/login");
+    return;
   };
 
   res.render("urls_new", templateVars);
@@ -128,6 +131,7 @@ app.get("/u/:id", (req, res) => {
   if (urlDatabase.hasOwnProperty(req.params.id)) {
     const longURL = urlDatabase[req.params.id].longURL;
     res.redirect(longURL);
+    return
   } else {
     res.status(404).send("Id does not exist");
     return
@@ -149,6 +153,7 @@ app.get("/register", (req, res) => {
 
   if (user) {
     res.redirect("/urls");
+    return
   };
 
   res.render("register", templateVars);
@@ -164,6 +169,7 @@ app.get("/login", (req, res) => {
 
   if (user) {
     res.redirect("/urls");
+    return
   };
 
   res.render("login", templateVars);
@@ -205,8 +211,10 @@ app.post("/login", (req, res) => {
   if (user && bcrypt.compareSync(password, user.hashedPassword)) {
     req.session.user_id = user.id;
     res.redirect("/urls");
+    return
   } else {
     res.status(403).send("Email or password is incorrect");
+    return
   };
 
 });
