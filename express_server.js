@@ -12,7 +12,7 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: 'session',
-  keys: ['randomkey1', 'randomkey2']
+  keys: ['randomkey1', 'randomkey2'],
 }));
 
 
