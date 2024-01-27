@@ -15,7 +15,7 @@ const testUsers = {
   }
 };
 
-console.log(getUserByEmail("user@example.com", testUsers));
+// console.log(getUserByEmail("user@example.com", testUsers));
 
 
 describe('getUserByEmail', () => {

@@ -19,6 +19,9 @@ app.use(cookieSession({
 // set's how many salt rounds being used during hashing.
 const salt = bcrypt.genSaltSync(10);
 
+// const date = Date("1995-12-17T03:24:00");
+
+// console.log(date);
 
 
 
@@ -169,7 +172,7 @@ app.post("/urls", (req, res) => {
     longURL,
     userID: userId
   };
-  console.log(urlDatabase);
+
   res.redirect(`/urls/${id}`);
 });
 
@@ -209,7 +212,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Please provide a email and a password");
   };
 
-  console.log(getUserByEmail);
+
   const user = getUserByEmail(email, users);
 
 
@@ -229,8 +232,6 @@ app.post("/register", (req, res) => {
 
   // add new user to user database
   users[id] = newUser;
-
-  console.log(users);
 
   req.session.user_id = id;
 
@@ -287,6 +288,7 @@ app.post("/urls/:id", (req, res) => {
   };
   res.redirect("/urls");
 });
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
